@@ -24,7 +24,7 @@ library(viridis)
 
 
 ```{r}
-granuloma_data <- read.csv("/Users/PabloM/Documents/HenaoLabDocuments/R_Projects/Granuloma_MLM/IHC_ISH_clean_data_WIP 1.csv")
+granuloma_data <- read.csv("/Users/pablo/Documents/R_packages/MLM_Granulomas/IHC_ISH_clean_data_WIP 1.csv")
 
 
 granuloma_data
@@ -390,17 +390,18 @@ ggplot(granuloma_data, aes(x = CD4_percent, y = (rep_tb/total_tb), color = lesio
 ```{r}
 
 # Fit the multilevel model
-model <- lmer(log_rep_tb ~ CD4_prop + (1 | lesion) + (1 | mouse), data = granuloma_data)
+model <- lmer(rep_tb ~ CD4_prop + (1 | mouse), data = granuloma_data)
+#offset nd family gmler??
 
-model1 <- lmer(log_rep_tb ~ CD4_prop + (1 | lesion/mouse), data = granuloma_data)
-
-model.d <- lmer(log_rep_tb ~ CD4_prop + mouse + lesion + 
-  mouse:lesion + CD4_prop:lesion + (lesion | mouse), data = granuloma_data)
+# model1 <- lmer(log_rep_tb ~ CD4_prop + (1 | lesion/mouse), data = granuloma_data)
+# 
+# model.d <- lmer(log_rep_tb ~ CD4_prop + mouse + lesion + 
+#   mouse:lesion + CD4_prop:lesion + (lesion | mouse), data = granuloma_data)
 
 # Summarize the model
 summary(model)
 
-residuals(model)
+residuals <- residuals(model)
 plot(fitted(model), residuals, main = "Residuals vs. Fitted", xlab = "Fitted values", ylab = "Residuals")
 abline(h = 0, col = "red")  
 
