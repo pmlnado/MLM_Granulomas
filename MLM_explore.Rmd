@@ -19,15 +19,11 @@ library(kableExtra)
 library(tidyverse)
 library(ggplot2)
 library(viridis)
-
-
-
-
 ```
 
 
 ```{r}
-granuloma_data <- read.csv("/Users/pablo/Documents/R_packages/MLM_Granulomas/IHC_ISH_clean_data_WIP 1.csv")
+granuloma_data <- read.csv("IHC_ISH_clean_data_WIP 1.csv")
 
 
 granuloma_data
@@ -390,29 +386,21 @@ ggplot(granuloma_data, aes(x = CD4_percent, y = (rep_tb/total_tb), color = lesio
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
-```{r}
 
+```{r}
 # Fit the multilevel model
-model <- lmer(rep_tb ~ CD4_prop + (1 | mouse), data = granuloma_data)
+model <- glmer(rep_tb ~ CD4_prop + (1 | mouse/lesion) +, data = granuloma_data, family = poisson())
+
+
+model <- glmer(rep_tb ~ CD4_prop + (1 | mouse/lesion) +  (1 | mouse) + (1 | RS_prop), data = granuloma_data, family = poisson())
 #offset nd family gmler??
 
-# model1 <- lmer(log_rep_tb ~ CD4_prop + (1 | lesion/mouse), data = granuloma_data)
-# 
-# model.d <- lmer(log_rep_tb ~ CD4_prop + mouse + lesion + 
-#   mouse:lesion + CD4_prop:lesion + (lesion | mouse), data = granuloma_data)
-
-# Summarize the model
 summary(model)
 
-residuals <- residuals(model)
-plot(fitted(model), residuals, main = "Residuals vs. Fitted", xlab = "Fitted values", ylab = "Residuals")
-abline(h = 0, col = "red")  
 
+glmer.nb(RS_prop ~ CD4_prop + (1 | mouse/lesion), data = granuloma_data)
 
-qqnorm(residuals)
-qqline(residuals)
-
-
+glmer(RS_prop ~ CD4_prop + (1 | mouse/lesion), data = granuloma_data, family = quasipoisson())
 
 ```
 
