@@ -393,8 +393,10 @@ model <- glmer(rep_tb ~ CD4_prop + (1 | mouse/lesion), data = granuloma_data, fa
 
 summary(model)
 
+
+library(sjPlot)
 # Plot fixed effects
-plot_model(model, type = "fe") 
+plot_model(model, type = "eff") 
 
 # Plot random effects
 plot_model(model, type = "re")
