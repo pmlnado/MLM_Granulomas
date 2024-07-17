@@ -388,10 +388,6 @@ ggplot(granuloma_data, aes(x = CD4_percent, y = (rep_tb/total_tb), color = lesio
 ```
 
 ```{r}
-# Fit the multilevel model
-glmer(RS_prop ~ CD4_prop + (1 | mouse/lesion), data = granuloma_data, family = binomial())
-
-
 glmer(rep_tb ~ CD4_prop + (1 | mouse/lesion), data = granuloma_data, family = poisson())
 #offset nd family gmler??
 
