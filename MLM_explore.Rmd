@@ -2,7 +2,9 @@
 title: "mlm"
 author: "Pablo Maldonado"
 date: "7/11/2024"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -24,9 +26,6 @@ library(viridis)
 
 ```{r}
 granuloma_data <- read.csv("IHC_ISH_clean_data_WIP 1.csv")
-
-
-granuloma_data
 ```
 
 ```{r}
@@ -147,7 +146,7 @@ ggplot(granuloma_data, aes(x = mouse, y = CD4_percent, color = lesion)) +
   ggtitle("Dotplot of CD4_percent") +
   xlab("Mouse") +
   ylab("CD4_percent") +
-  scale_color_viridis_d() +  # Viridis color scale
+  scale_color_viridis_d() +  
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -157,7 +156,7 @@ ggplot(granuloma_data, aes(x = mouse, y = CD8_percent, color = lesion)) +
   ggtitle("Dotplot of CD8_percent") +
   xlab("Mouse") +
   ylab("CD8_percent") +
-  scale_color_viridis_d() +  # Viridis color scale
+  scale_color_viridis_d() +  
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -167,7 +166,7 @@ ggplot(granuloma_data, aes(x = mouse, y = Other_percent, color = lesion)) +
   ggtitle("Dotplot of Other_percent") +
   xlab("Mouse") +
   ylab("Other_percent") +
-  scale_color_viridis_d() +  # Viridis color scale
+  scale_color_viridis_d() + 
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -177,7 +176,7 @@ ggplot(granuloma_data, aes(x = mouse, y = RS_prop, color = lesion)) +
   ggtitle("Dotplot of RS_prop") +
   xlab("Mouse") +
   ylab("RS_prop") +
-  scale_color_viridis_d() +  # Viridis color scale
+  scale_color_viridis_d() +  
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -187,7 +186,7 @@ ggplot(granuloma_data, aes(x = mouse, y = RS_index, color = lesion)) +
   ggtitle("Dotplot of RS_index") +
   xlab("Mouse") +
   ylab("RS_index") +
-  scale_color_viridis_d() +  # Viridis color scale
+  scale_color_viridis_d() + 
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -197,7 +196,7 @@ ggplot(granuloma_data, aes(x = mouse, y = log_rep_tb, color = lesion)) +
   ggtitle("Dotplot of log_rep_tb") +
   xlab("Mouse") +
   ylab("log_rep_tb") +
-  scale_color_viridis_d() +  # Viridis color scale
+  scale_color_viridis_d() + 
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -207,7 +206,7 @@ ggplot(granuloma_data, aes(x = mouse, y = log_nonrep_tb, color = lesion)) +
   ggtitle("Dotplot of log_nonrep_tb") +
   xlab("Mouse") +
   ylab("log_nonrep_tb") +
-  scale_color_viridis_d() +  # Viridis color scale
+  scale_color_viridis_d() + 
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -217,7 +216,7 @@ ggplot(granuloma_data, aes(x = mouse, y = log_total_tb, color = lesion)) +
   ggtitle("Dotplot of log_total_tb") +
   xlab("Mouse") +
   ylab("log_total_tb") +
-  scale_color_viridis_d() +  # Viridis color scale
+  scale_color_viridis_d() + 
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -227,7 +226,7 @@ ggplot(granuloma_data, aes(x = mouse, y = log_RS_index, color = lesion)) +
   ggtitle("Dotplot of log_RS_index") +
   xlab("Mouse") +
   ylab("log_RS_index") +
-  scale_color_viridis_d() +  # Viridis color scale
+  scale_color_viridis_d() +  
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -237,7 +236,7 @@ ggplot(granuloma_data, aes(x = mouse, y = log_RS_prop, color = lesion)) +
   ggtitle("Dotplot of log_RS_prop") +
   xlab("Mouse") +
   ylab("log_RS_prop") +
-  scale_color_viridis_d() +  # Viridis color scale
+  scale_color_viridis_d() +  
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -246,7 +245,7 @@ ggplot(granuloma_data, aes(x = mouse, y = (rep_tb/total_tb), color = lesion)) +
   ggtitle("Dotplot of Prop of Replicating Mtb") +
   xlab("Mouse") +
   ylab("Prop of Replicating Mtb") +
-  scale_color_viridis_d() +  # Viridis color scale
+  scale_color_viridis_d() +  
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -364,14 +363,34 @@ ggplot(granuloma_data, aes(x = lesion, y = log_RS_prop)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ```
-
+# Cell Percentges vs Proportion of Replicating TB
 ```{r}
+ggplot(granuloma_data, aes(x = Other_percent, y = (rep_tb/total_tb), color = lesion)) +
+  geom_point() +
+  facet_wrap(~ mouse) +
+  ggtitle("Other_percent vs Prop of Replicating Mtb") +
+  xlab("Other_percent") +
+  ylab("Prop of Replicating TB") +
+  scale_color_viridis_d() + 
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
 
 ggplot(granuloma_data, aes(x = B220_percent, y = (rep_tb/total_tb), color = lesion)) +
   geom_point() +
   facet_wrap(~ mouse) +
   ggtitle("B220_percent vs Prop of Replicating Mtb") +
   xlab("B220_percent") +
+  ylab("Prop of Replicating TB") +
+  scale_color_viridis_d() + 
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(granuloma_data, aes(x = CD8_percent, y = (rep_tb/total_tb), color = lesion)) +
+  geom_point() +
+  facet_wrap(~ mouse) +
+  ggtitle("CD8_percent vs Prop of Replicating Mtb") +
+  xlab("CD8_percent") +
   ylab("Prop of Replicating TB") +
   scale_color_viridis_d() + 
   theme_minimal() +
@@ -387,29 +406,199 @@ ggplot(granuloma_data, aes(x = CD4_percent, y = (rep_tb/total_tb), color = lesio
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
-
+# Each point is a lesion, may come from the same mouse
 ```{r}
-model <- glmer(rep_tb ~ CD4_prop + (1 | mouse/lesion), data = granuloma_data, family = poisson())
-#offset nd family gmler??
 
-summary(model)
+granuloma_data_treatment <- granuloma_data %>%
+  mutate(treatment = ifelse(grepl("^BCG", mouse), "BCG", "SAL"))
+
+
+
+ggplot(granuloma_data_treatment, aes(x = CD8_percent, y = (rep_tb/total_tb), color = treatment)) +
+  geom_point() +
+  ggtitle("CD8_percent vs Prop of Replicating Mtb") +
+  xlab("CD8_percent") +
+  ylab("Prop of Replicating TB") +
+  scale_color_viridis_d() + 
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(granuloma_data_treatment, aes(x = B220_percent, y = (rep_tb/total_tb), color = treatment)) +
+  geom_point() +
+  ggtitle("B220_percent vs Prop of Replicating Mtb") +
+  xlab("B220_percent") +
+  ylab("Prop of Replicating TB") +
+  scale_color_viridis_d() + 
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(granuloma_data_treatment, aes(x = Other_percent, y = (rep_tb/total_tb), color = treatment)) +
+  geom_point() +
+  ggtitle("Other_percent vs Prop of Replicating Mtb") +
+  xlab("Other_percent") +
+  ylab("Prop of Replicating TB") +
+  scale_color_viridis_d() + 
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(granuloma_data_treatment, aes(x = CD4_percent, y = (rep_tb/total_tb), color = treatment)) +
+  geom_point() +
+  ggtitle("CD4_percent vs Prop of Replicating Mtb") +
+  xlab("CD4_percent") +
+  ylab("Prop of Replicating TB") +
+  scale_color_viridis_d() + 
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+# Fecteted by mouse, each dot is a lesion within that mouse
+```{r}
+  
+ggplot(granuloma_data_treatment, aes(x = CD8_percent, y = (rep_tb/total_tb), color = treatment)) +
+  geom_point() +
+  facet_wrap(~ mouse) +
+  ggtitle("CD8_percent vs Prop of Replicating Mtb") +
+  xlab("CD8_percent") +
+  ylab("Prop of Replicating TB") +
+  scale_color_viridis_d() + 
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(granuloma_data_treatment, aes(x = B220_percent, y = (rep_tb/total_tb), color = treatment)) +
+  geom_point() +
+  facet_wrap(~ mouse) +
+  ggtitle("B220_percent vs Prop of Replicating Mtb") +
+  xlab("B220_percent") +
+  ylab("Prop of Replicating TB") +
+  scale_color_viridis_d() + 
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(granuloma_data_treatment, aes(x = Other_percent, y = (rep_tb/total_tb), color = treatment)) +
+  geom_point() +
+  facet_wrap(~ mouse) +
+  ggtitle("Other_percent vs Prop of Replicating Mtb") +
+  xlab("Other_percent") +
+  ylab("Prop of Replicating TB") +
+  scale_color_viridis_d() + 
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(granuloma_data_treatment, aes(x = CD4_percent, y = (rep_tb/total_tb), color = treatment)) +
+  geom_point() +
+  facet_wrap(~ mouse) +
+  ggtitle("CD4_percent vs Prop of Replicating Mtb") +
+  xlab("CD4_percent") +
+  ylab("Prop of Replicating TB") +
+  scale_color_viridis_d() + 
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+# Lesion nested within mouse
+```{r}
+model_nested <- glmer(rep_tb ~ CD4_prop + (1 | mouse/lesion), data = granuloma_data, family = poisson())
+
+
+summary(model_nested)
 
 
 # Compute the dispersion statistic
-dispersion_statistic <- sum(residuals(model, type = "pearson")^2) / df.residual(model)
+dispersion_statistic <- sum(residuals(model_nested, type = "pearson")^2) / df.residual(model_nested)
 dispersion_statistic
+
+
+# Calculate Pearson residuals
+pearson_residuals <- residuals(model_nested, type = "pearson")
+
+# Compute the dispersion statistic
+P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_nested) - length(fixef(model_nested)))
+
+P_dispersion_statistic
 ```
 
+# Lesion nested within mouse + offset to account for total Mtb
 ```{r}
-model2 <- glmer(rep_tb ~ CD4_prop + (1 | mouse), data = granuloma_data, family = poisson())
-#offset nd family gmler??
+model_nested_offset <- glmer(rep_tb ~ CD4_prop + (1 | mouse/lesion) + offset(log(total_tb)), data = granuloma_data, family = poisson())
 
-summary(model2)
+summary(model_nested_offset)
 
 
 # Compute the dispersion statistic
-dispersion_statistic <- sum(residuals(model2, type = "pearson")^2) / df.residual(model2)
+dispersion_statistic <- sum(residuals(model_nested_offset , type = "pearson")^2) / df.residual(model_nested_offset )
 dispersion_statistic
+
+# Calculate Pearson residuals
+pearson_residuals <- residuals(model_nested_offset, type = "pearson")
+
+# Compute the dispersion statistic
+P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_nested_offset) - length(fixef(model_nested_offset)))
+
+P_dispersion_statistic
 ```
 
+# Model accounting for mouse variance
+```{r}
+model_mouse <- glmer(rep_tb ~ CD4_prop + (1 | mouse), data = granuloma_data, family = poisson())
+
+
+summary(model_mouse)
+
+
+# Compute the dispersion statistic
+dispersion_statistic <- sum(residuals(model_mouse, type = "pearson")^2) / df.residual(model_mouse)
+dispersion_statistic
+
+# Calculate Pearson residuals
+pearson_residuals <- residuals(model_mouse, type = "pearson")
+
+# Compute the dispersion statistic
+P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_mouse) - length(fixef(model_mouse)))
+
+P_dispersion_statistic
+```
+
+
+# Model accounting for mouse variance + offset of total Mtb
+```{r}
+# Fitting the model with the offset
+model_mouse_offset <- glmer(rep_tb ~ CD4_prop + (1 | mouse) + offset(log(total_tb)), 
+                           data = granuloma_data, 
+                           family = poisson())
+
+# Summary of the model
+summary(model_mouse_offset)
+
+
+dispersion_statistic <- sum(residuals(model_mouse_offset, type = "pearson")^2) / df.residual(model_mouse_offset)
+dispersion_statistic
+
+# Calculate Pearson residuals
+pearson_residuals <- residuals(model_mouse_offset, type = "pearson")
+
+# Compute the dispersion statistic
+P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_mouse_offset) - length(fixef(model_mouse_offset)))
+
+P_dispersion_statistic
+```
+
+
+# Negative binomial model accounting for mouse variance + offset of total Mtb
+```{r}
+# Fit the negative binomial model
+model_nb <- glmer.nb(rep_tb ~ CD4_prop + (1 | mouse) + offset(log(total_tb)), data = granuloma_data)
+
+# Summary of the model
+summary(model_nb)
+
+dispersion_statistic <- sum(residuals(model_nb, type = "pearson")^2) / df.residual(model_nb)
+dispersion_statistic
+
+# Calculate Pearson residuals
+pearson_residuals <- residuals(model_nb, type = "pearson")
+
+# Compute the dispersion statistic
+P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_nb) - length(fixef(model_nb)))
+
+P_dispersion_statistic
+```
 
