@@ -30,6 +30,7 @@ granuloma_data
 ```
 
 ```{r}
+
 colnames(granuloma_data)
 
 granuloma_data$Timepoint <- factor(granuloma_data$Timepoint, levels = c("D56", "D114"))
