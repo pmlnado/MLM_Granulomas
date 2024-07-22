@@ -498,7 +498,8 @@ ggplot(granuloma_data_treatment, aes(x = CD4_percent, y = (rep_tb/total_tb), col
 # Lesion nested within mouse
 ```{r}
 model_nested <- glmer(rep_tb ~ CD4_prop + (1 | mouse/lesion), data = granuloma_data, family = poisson())
-
+model_nested <- glmer(rep_tb ~ CD4_prop + (1 | mouse) + (1 | mouse:lesion), data = granuloma_data, family = poisson()) # Same model as 1st
+model_nested <- glmer(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse) + (1 | mouse:lesion), data = granuloma_data, family = poisson())
 
 summary(model_nested)
 
@@ -515,11 +516,34 @@ pearson_residuals <- residuals(model_nested, type = "pearson")
 P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_nested) - length(fixef(model_nested)))
 
 P_dispersion_statistic
+
+
+# # Fit the two models
+# model1 <- glmer(rep_tb ~ CD4_prop + (1 | mouse/lesion), data = granuloma_data, family = poisson())
+# model2 <- glmer(rep_tb ~ CD4_prop + (1 | mouse), data = granuloma_data, family = poisson())
+# 
+# # Perform the likelihood ratio test
+# anova(model1, model2)
+
+
+ggplot(granuloma_data_treatment, aes(x = CD4_percent, y = (rep_tb/total_tb), color = Vaccination)) +
+  geom_point() +
+  facet_wrap(~ Timepoint) +
+  ggtitle("CD4_percent vs Prop of Replicating Mtb") +
+  xlab("CD4_percent") +
+  ylab("Prop of Replicating TB") +
+  scale_color_viridis_d() + 
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
 ```
 
 # Lesion nested within mouse + offset to account for total Mtb
 ```{r}
 model_nested_offset <- glmer(rep_tb ~ CD4_prop + (1 | mouse/lesion) + offset(log(total_tb)), data = granuloma_data, family = poisson())
+
+model_nested_offset <- glmer(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse) + (1 | mouse:lesion) + offset(log(total_tb)), data = granuloma_data, family = poisson())
 
 summary(model_nested_offset)
 
@@ -539,7 +563,7 @@ P_dispersion_statistic
 
 # Model accounting for mouse variance
 ```{r}
-model_mouse <- glmer(rep_tb ~ CD4_prop + (1 | mouse), data = granuloma_data, family = poisson())
+model_mouse <- glmer(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse), data = granuloma_data, family = poisson())
 
 
 summary(model_mouse)
@@ -562,7 +586,7 @@ P_dispersion_statistic
 # Model accounting for mouse variance + offset of total Mtb
 ```{r}
 # Fitting the model with the offset
-model_mouse_offset <- glmer(rep_tb ~ CD4_prop + (1 | mouse) + offset(log(total_tb)), 
+model_mouse_offset <- glmer(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse) + offset(log(total_tb)), 
                            data = granuloma_data, 
                            family = poisson())
 
@@ -586,7 +610,7 @@ P_dispersion_statistic
 # Negative binomial model accounting for mouse variance + offset of total Mtb
 ```{r}
 # Fit the negative binomial model
-model_nb <- glmer.nb(rep_tb ~ CD4_prop + (1 | mouse) + offset(log(total_tb)), data = granuloma_data)
+model_nb <- glmer.nb(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse) + offset(log(total_tb)), data = granuloma_data)
 
 # Summary of the model
 summary(model_nb)
@@ -607,108 +631,25 @@ P_dispersion_statistic
 
 # Lesion nested within mouse
 ```{r}
-model_nested <- glmer(rep_tb ~ DAPI_prop + (1 | mouse/lesion), data = granuloma_data, family = poisson())
 
-
-summary(model_nested)
-
-
-# Compute the dispersion statistic
-dispersion_statistic <- sum(residuals(model_nested, type = "pearson")^2) / df.residual(model_nested)
-dispersion_statistic
-
-
-# Calculate Pearson residuals
-pearson_residuals <- residuals(model_nested, type = "pearson")
-
-# Compute the dispersion statistic
-P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_nested) - length(fixef(model_nested)))
-
-P_dispersion_statistic
 ```
 
 # Lesion nested within mouse + offset to account for total Mtb
 ```{r}
-model_nested_offset <- glmer(rep_tb ~ DAPI_prop + (1 | mouse/lesion) + offset(log(total_tb)), data = granuloma_data, family = poisson())
 
-summary(model_nested_offset)
-
-
-# Compute the dispersion statistic
-dispersion_statistic <- sum(residuals(model_nested_offset , type = "pearson")^2) / df.residual(model_nested_offset )
-dispersion_statistic
-
-# Calculate Pearson residuals
-pearson_residuals <- residuals(model_nested_offset, type = "pearson")
-
-# Compute the dispersion statistic
-P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_nested_offset) - length(fixef(model_nested_offset)))
-
-P_dispersion_statistic
 ```
 
 # Model accounting for mouse variance
 ```{r}
-model_mouse <- glmer(rep_tb ~ DAPI_prop + (1 | mouse), data = granuloma_data, family = poisson())
 
-
-summary(model_mouse)
-
-
-# Compute the dispersion statistic
-dispersion_statistic <- sum(residuals(model_mouse, type = "pearson")^2) / df.residual(model_mouse)
-dispersion_statistic
-
-# Calculate Pearson residuals
-pearson_residuals <- residuals(model_mouse, type = "pearson")
-
-# Compute the dispersion statistic
-P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_mouse) - length(fixef(model_mouse)))
-
-P_dispersion_statistic
 ```
-
 
 # Model accounting for mouse variance + offset of total Mtb
 ```{r}
-# Fitting the model with the offset
-model_mouse_offset <- glmer(rep_tb ~ DAPI_prop + (1 | mouse) + offset(log(total_tb)), 
-                           data = granuloma_data, 
-                           family = poisson())
 
-# Summary of the model
-summary(model_mouse_offset)
-
-
-dispersion_statistic <- sum(residuals(model_mouse_offset, type = "pearson")^2) / df.residual(model_mouse_offset)
-dispersion_statistic
-
-# Calculate Pearson residuals
-pearson_residuals <- residuals(model_mouse_offset, type = "pearson")
-
-# Compute the dispersion statistic
-P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_mouse_offset) - length(fixef(model_mouse_offset)))
-
-P_dispersion_statistic
 ```
-
 
 # Negative binomial model accounting for mouse variance + offset of total Mtb
 ```{r}
-# Fit the negative binomial model
-model_nb <- glmer.nb(rep_tb ~ DAPI_prop + (1 | mouse) + offset(log(total_tb)), data = granuloma_data)
 
-# Summary of the model
-summary(model_nb)
-
-dispersion_statistic <- sum(residuals(model_nb, type = "pearson")^2) / df.residual(model_nb)
-dispersion_statistic
-
-# Calculate Pearson residuals
-pearson_residuals <- residuals(model_nb, type = "pearson")
-
-# Compute the dispersion statistic
-P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_nb) - length(fixef(model_nb)))
-
-P_dispersion_statistic
 ```
