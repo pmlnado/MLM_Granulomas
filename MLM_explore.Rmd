@@ -625,6 +625,9 @@ pearson_residuals <- residuals(model_nb, type = "pearson")
 P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_nb) - length(fixef(model_nb)))
 
 P_dispersion_statistic
+
+#https://stackoverflow.com/questions/77564725/nesting-a-random-factor-in-glmm
+#https://stats.stackexchange.com/questions/228800/crossed-vs-nested-random-effects-how-do-they-differ-and-how-are-they-specified
 ```
 
 # Modeling "Other"
