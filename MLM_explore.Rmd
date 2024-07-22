@@ -541,7 +541,13 @@ ggplot(granuloma_data_treatment, aes(x = CD4_percent, y = (rep_tb/total_tb), col
 
 # Lesion nested within mouse + offset to account for total Mtb
 ```{r}
-model_nested_offset <- glmer(rep_tb ~ CD4_prop + (1 | mouse/lesion) + offset(log(total_tb)), data = granuloma_data, family = poisson())
+
+granuloma_data <- granuloma_data %>% 
+  mutate(unique_lesion = rownames(granuloma_data))
+
+model_nested_offset <- glmer(rep_tb ~ CD4_prop + (1 | mouse/unique_lesion) + offset(log(total_tb)), data = granuloma_data, family = poisson())
+
+model_nested_offset <- glmer(rep_tb ~ CD4_prop + (1 | mouse) + offset(log(total_tb)), data = granuloma_data, family = poisson())
 
 model_nested_offset <- glmer(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse) + (1 | mouse:lesion) + offset(log(total_tb)), data = granuloma_data, family = poisson())
 
