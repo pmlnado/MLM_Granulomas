@@ -544,12 +544,12 @@ ggplot(granuloma_data_treatment, aes(x = CD4_percent, y = (rep_tb/total_tb), col
 
 granuloma_data <- granuloma_data %>% 
   mutate(unique_lesion = rownames(granuloma_data))
+# 
+# model_nested_offset <- glmer(rep_tb ~ CD4_prop + (1 | mouse/unique_lesion) + offset(log(total_tb)), data = granuloma_data, family = poisson())
 
-model_nested_offset <- glmer(rep_tb ~ CD4_prop + (1 | mouse/unique_lesion) + offset(log(total_tb)), data = granuloma_data, family = poisson())
-
-model_nested_offset <- glmer(rep_tb ~ CD4_prop + (1 | mouse) + offset(log(total_tb)), data = granuloma_data, family = poisson())
-
-model_nested_offset <- glmer(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse) + (1 | mouse:lesion) + offset(log(total_tb)), data = granuloma_data, family = poisson())
+# model_nested_offset <- glmer(rep_tb ~ CD4_prop + (1 | mouse) + offset(log(total_tb)), data = granuloma_data, family = poisson())
+# 
+model_nested_offset <- glmer(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse) + (1 | mouse:unique_lesion) + offset(log(total_tb)), data = granuloma_data, family = poisson())
 
 summary(model_nested_offset)
 
@@ -616,8 +616,8 @@ P_dispersion_statistic
 # Negative binomial model accounting for mouse variance + offset of total Mtb
 ```{r}
 # Fit the negative binomial model
-model_nb <- glmer.nb(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse) + offset(log(total_tb)), data = granuloma_data)
-
+#model_nb <- glmer.nb(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse) + offset(log(total_tb)), data = granuloma_data)
+model_nb <- glmer.nb(rep_tb ~ CD4_count_500 + Vaccination * Timepoint + (1 | mouse) + offset(log(total_tb)), data = granuloma_data)
 # Summary of the model
 summary(model_nb)
 
