@@ -641,12 +641,14 @@ P_dispersion_statistic
 # Lesion nested within mouse
 ```{r}
 
+
 ```
 
 # Lesion nested within mouse + offset to account for total Mtb
 ```{r}
 
 ```
+
 
 # Model accounting for mouse variance
 ```{r}
