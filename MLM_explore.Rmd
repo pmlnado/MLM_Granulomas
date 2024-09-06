@@ -365,6 +365,7 @@ ggplot(granuloma_data, aes(x = lesion, y = log_RS_prop)) +
 ```
 # Cell Percentges vs Proportion of Replicating TB
 ```{r}
+#GOOD
 ggplot(granuloma_data, aes(x = Other_percent, y = (rep_tb/total_tb), color = lesion)) +
   geom_point() +
   facet_wrap(~ mouse) +
@@ -408,7 +409,7 @@ ggplot(granuloma_data, aes(x = CD4_percent, y = (rep_tb/total_tb), color = lesio
 ```
 # Each point is a lesion, may come from the same mouse
 ```{r}
-
+#GOOD
 granuloma_data_treatment <- granuloma_data %>%
   mutate(treatment = ifelse(grepl("^BCG", mouse), "BCG", "SAL"))
 
@@ -452,7 +453,7 @@ ggplot(granuloma_data_treatment, aes(x = CD4_percent, y = (rep_tb/total_tb), col
 ```
 # Fecteted by mouse, each dot is a lesion within that mouse
 ```{r}
-  
+#GOOD
 ggplot(granuloma_data_treatment, aes(x = CD8_percent, y = (rep_tb/total_tb), color = treatment)) +
   geom_point() +
   facet_wrap(~ mouse) +
@@ -501,6 +502,7 @@ model_nested <- glmer(rep_tb ~ CD4_prop + (1 | mouse/lesion), data = granuloma_d
 model_nested <- glmer(rep_tb ~ CD4_prop + (1 | mouse) + (1 | mouse:lesion), data = granuloma_data, family = poisson()) # Same model as 1st
 model_nested <- glmer(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse) + (1 | mouse:lesion), data = granuloma_data, family = poisson())
 
+
 summary(model_nested)
 
 
@@ -525,7 +527,7 @@ P_dispersion_statistic
 # # Perform the likelihood ratio test
 # anova(model1, model2)
 
-
+#GOOD
 ggplot(granuloma_data_treatment, aes(x = CD4_percent, y = (rep_tb/total_tb), color = Vaccination)) +
   geom_point() +
   facet_wrap(~ Timepoint) +
