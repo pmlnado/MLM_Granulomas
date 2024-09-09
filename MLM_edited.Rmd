@@ -30,6 +30,26 @@ granuloma_data <- read.csv("IHC_ISH_clean_data_WIP 1.csv")
 
 ```{r}
 
+# Fit Poisson GLMs with offset
+glm_RS <- glm(RS_prop ~ CD4_count_500 * Vaccination * Timepoint + offset(log(total_tb)), data = granuloma_data, family = quasipoisson())
+
+summary(glm_RS)
+
+# Correlation matrix
+cor(granuloma_data[, c("RS_prop", "CD4_count_500")])
+
+
+cor(granuloma_data[, c("RS_prop", "CD8_count_500")])
+
+
+cor(granuloma_data[, c("RS_prop", "B220_count_500")])
+
+```
+
+
+
+```{r}
+
 colnames(granuloma_data)
 
 granuloma_data$Timepoint <- factor(granuloma_data$Timepoint, levels = c("D56", "D114"))
