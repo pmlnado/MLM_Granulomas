@@ -29,12 +29,33 @@ granuloma_data <- read.csv("IHC_ISH_clean_data_WIP 1.csv")
 ```
 
 ```{r}
-
 # Fit Poisson GLMs with offset
-glm_RS <- glm(RS_prop ~ CD4_count_500 * Vaccination * Timepoint + offset(log(total_tb)), data = granuloma_data, family = quasipoisson())
+glm_granuloma <- glm(rep_tb ~ CD4_count_500 + CD8_count_500 + B220_count_500 + Vaccination + Timepoint + offset(log(total_tb)), data = granuloma_data, family = quasipoisson())
 
-summary(glm_RS)
 
+summary(glm_granuloma)
+
+# Coefficients from the model
+coefficients <- c(Intercept = -2.70185,
+                  CD4_count_500 = -0.19521,
+                  CD8_count_500 = 0.22937,
+                  B220_count_500 = 0.01623,
+                  VaccinationSAL = 0.43675,
+                  TimepointD56 = 0.79078)
+
+# Function to calculate percentage change
+percent_change <- function(coef) {
+  (exp(coef) - 1) * 100
+}
+
+# Apply the function to all coefficients (excluding the intercept)
+percent_changes <- sapply(coefficients[-1], percent_change)
+
+# Output the percent changes
+percent_changes
+```
+```{r}
+colnames(granuloma_data)
 
 # Correlation matrix
 cor(granuloma_data[, c("RS_prop", "CD4_count_500")])
@@ -44,111 +65,8 @@ cor(granuloma_data[, c("RS_prop", "CD8_count_500")])
 
 
 cor(granuloma_data[, c("RS_prop", "B220_count_500")])
-
 ```
 
-
-
-```{r}
-
-colnames(granuloma_data)
-
-granuloma_data$Timepoint <- factor(granuloma_data$Timepoint, levels = c("D56", "D114"))
-granuloma_data$Vaccination <- factor(granuloma_data$Vaccination, levels = c("SAL", "BCG"))
-
-ggplot(granuloma_data, aes(x = B220_percent)) +
-  geom_histogram(binwidth = 1, fill = "black", color = "white") +
-  facet_grid(Vaccination ~ Timepoint) +
-  ggtitle("Histogram of B220_percent") +
-  xlab("B220_percent") +
-  ylab("Frequency") + 
-  theme_minimal()
-
-ggplot(granuloma_data, aes(x = CD4_percent)) +
-  geom_histogram(binwidth = 1, fill = "black", color = "white") +
-  facet_grid(Vaccination ~ Timepoint) +
-  ggtitle("Histogram of CD4_percent") +
-  xlab("CD4_percent") +
-  ylab("Frequency") + 
-  theme_minimal()
-
-ggplot(granuloma_data, aes(x = CD8_percent)) +
-  geom_histogram(binwidth = 1, fill = "black", color = "white") +
-  facet_grid(Vaccination ~ Timepoint) +
-  ggtitle("Histogram of CD8_percent") +
-  xlab("CD8_percent") +
-  ylab("Frequency") + 
-  theme_minimal()
-
-ggplot(granuloma_data, aes(x = Other_percent)) +
-  geom_histogram(binwidth = 1, fill = "black", color = "white") +
-  facet_grid(Vaccination ~ Timepoint) +
-  ggtitle("Histogram of Other_percent") +
-  xlab("Other_percent") +
-  ylab("Frequency") + 
-  theme_minimal()
-
-```
-
-```{r}
-
-ggplot(granuloma_data, aes(x = RS_prop)) +
-  geom_histogram(binwidth = 0.05, fill = "black", color = "white") +
-  facet_grid(Vaccination ~ Timepoint) +
-  ggtitle("Histogram of RS_prop") +
-  xlab("RS_prop") +
-  ylab("Frequency") + 
-  theme_minimal()
-
-ggplot(granuloma_data, aes(x = RS_index)) +
-  geom_histogram(binwidth = 0.5, fill = "black", color = "white") +
-  facet_grid(Vaccination ~ Timepoint) +
-  ggtitle("Histogram of RS_index") +
-  xlab("RS_index") +
-  ylab("Frequency") + 
-  theme_minimal()
-
-ggplot(granuloma_data, aes(x = log_rep_tb)) +
-  geom_histogram(binwidth = 0.5, fill = "black", color = "white") +
-  facet_grid(Vaccination ~ Timepoint) +
-  ggtitle("Histogram of log_rep_tb") +
-  xlab("log_rep_tb") +
-  ylab("Frequency") + 
-  theme_minimal()
-
-ggplot(granuloma_data, aes(x = log_nonrep_tb)) +
-  geom_histogram(binwidth = 0.5, fill = "black", color = "white") +
-  facet_grid(Vaccination ~ Timepoint) +
-  ggtitle("Histogram of log_nonrep_tb") +
-  xlab("log_nonrep_tb") +
-  ylab("Frequency") + 
-  theme_minimal()
-
-ggplot(granuloma_data, aes(x = log_total_tb)) +
-  geom_histogram(binwidth = 0.5, fill = "black", color = "white") +
-  facet_grid(Vaccination ~ Timepoint) +
-  ggtitle("Histogram of log_total_tb") +
-  xlab("log_total_tb") +
-  ylab("Frequency") + 
-  theme_minimal()
-
-ggplot(granuloma_data, aes(x = log_RS_index)) +
-  geom_histogram(binwidth = 0.5, fill = "black", color = "white") +
-  facet_grid(Vaccination ~ Timepoint) +
-  ggtitle("Histogram of log_RS_index") +
-  xlab("log_RS_index") +
-  ylab("Frequency") + 
-  theme_minimal()
-
-ggplot(granuloma_data, aes(x = log_RS_prop)) +
-  geom_histogram(binwidth = 0.5, fill = "black", color = "white") +
-  facet_grid(Vaccination ~ Timepoint) +
-  ggtitle("Histogram of log_RS_prop") +
-  xlab("log_RS_prop") +
-  ylab("Frequency") + 
-  theme_minimal()
-
-```
 
 ```{r fig.height=3, fig.width=8}
 # Plot for B220_percent
@@ -272,118 +190,6 @@ ggplot(granuloma_data, aes(x = mouse, y = (rep_tb/total_tb), color = lesion)) +
 
 ```
 
-```{r fig.height=5, fig.width=10}
-# Plot for B220_percent
-ggplot(granuloma_data, aes(x = lesion, y = B220_percent)) +
-  geom_jitter(color = "black", width = 0.2) +
-  facet_wrap(~ mouse + Timepoint) +
-  ggtitle("Dotplot of B220_percent") +
-  xlab("Lesion") +
-  ylab("B220_percent")+
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-# Plot for CD4_percent
-ggplot(granuloma_data, aes(x = lesion, y = CD4_percent)) +
-  geom_jitter(color = "black", width = 0.2) +
-  facet_wrap(~ mouse + Timepoint) +
-  ggtitle("Dotplot of CD4_percent") +
-  xlab("Lesion") +
-  ylab("CD4_percent") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-# Plot for CD8_percent
-ggplot(granuloma_data, aes(x = lesion, y = CD8_percent)) +
-  geom_jitter(color = "black", width = 0.2) +
-  facet_wrap(~ mouse + Timepoint) +
-  ggtitle("Dotplot of CD8_percent") +
-  xlab("Lesion") +
-  ylab("CD8_percent") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-# Plot for Other_percent
-ggplot(granuloma_data, aes(x = lesion, y = Other_percent)) +
-  geom_jitter(color = "black", width = 0.2) +
-  facet_wrap(~ mouse + Timepoint) +
-  ggtitle("Dotplot of Other_percent") +
-  xlab("Lesion") +
-  ylab("Other_percent") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-# Plot for RS_prop
-ggplot(granuloma_data, aes(x = lesion, y = RS_prop)) +
-  geom_jitter(color = "black", width = 0.2) +
-  facet_wrap(~ mouse + Timepoint) +
-  ggtitle("Dotplot of RS_prop") +
-  xlab("Lesion") +
-  ylab("RS_prop") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-# Plot for RS_index
-ggplot(granuloma_data, aes(x = lesion, y = RS_index)) +
-  geom_jitter(color = "black", width = 0.2) +
-  facet_wrap(~ mouse + Timepoint) +
-  ggtitle("Dotplot of RS_index") +
-  xlab("Lesion") +
-  ylab("RS_index") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-# Plot for log_rep_tb
-ggplot(granuloma_data, aes(x = lesion, y = log_rep_tb)) +
-  geom_jitter(color = "black", width = 0.2) +
-  facet_wrap(~ mouse + Timepoint) +
-  ggtitle("Dotplot of log_rep_tb") +
-  xlab("Lesion") +
-  ylab("log_rep_tb") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-# Plot for log_nonrep_tb
-ggplot(granuloma_data, aes(x = lesion, y = log_nonrep_tb)) +
-  geom_jitter(color = "black", width = 0.2) +
-  facet_wrap(~ mouse + Timepoint) +
-  ggtitle("Dotplot of log_nonrep_tb") +
-  xlab("Lesion") +
-  ylab("log_nonrep_tb") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-# Plot for log_total_tb
-ggplot(granuloma_data, aes(x = lesion, y = log_total_tb)) +
-  geom_jitter(color = "black", width = 0.2) +
-  facet_wrap(~ mouse + Timepoint) +
-  ggtitle("Dotplot of log_total_tb") +
-  xlab("Lesion") +
-  ylab("log_total_tb") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-# Plot for log_RS_index
-ggplot(granuloma_data, aes(x = lesion, y = log_RS_index)) +
-  geom_jitter(color = "black", width = 0.2) +
-  facet_wrap(~ mouse + Timepoint) +
-  ggtitle("Dotplot of log_RS_index") +
-  xlab("Lesion") +
-  ylab("log_RS_index") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-# Plot for log_RS_prop
-ggplot(granuloma_data, aes(x = lesion, y = log_RS_prop)) +
-  geom_jitter(color = "black", width = 0.2) +
-  facet_wrap(~ mouse + Timepoint) +
-  ggtitle("Dotplot of log_RS_prop") +
-  xlab("Lesion") +
-  ylab("log_RS_prop") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-```
 # Cell Percentges vs Proportion of Replicating TB
 ```{r}
 #GOOD
@@ -429,15 +235,11 @@ ggplot(granuloma_data, aes(x = CD4_percent, y = (rep_tb/total_tb), color = lesio
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 # Each point is a lesion, may come from the same mouse
+
 ```{r}
-#GOOD
-granuloma_data_treatment <- granuloma_data %>%
-  mutate(treatment = ifelse(grepl("^BCG", mouse), "BCG", "SAL"))
-
-
-
-ggplot(granuloma_data_treatment, aes(x = CD8_percent, y = (rep_tb/total_tb), color = treatment)) +
+ggplot(granuloma_data, aes(x = CD8_percent, y = (rep_tb/total_tb), color = Vaccination)) +
   geom_point() +
+  facet_wrap(~ Timepoint) +
   ggtitle("CD8_percent vs Prop of Replicating Mtb") +
   xlab("CD8_percent") +
   ylab("Prop of Replicating TB") +
@@ -445,8 +247,9 @@ ggplot(granuloma_data_treatment, aes(x = CD8_percent, y = (rep_tb/total_tb), col
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-ggplot(granuloma_data_treatment, aes(x = B220_percent, y = (rep_tb/total_tb), color = treatment)) +
+ggplot(granuloma_data, aes(x = B220_percent, y = (rep_tb/total_tb), color = Vaccination)) +
   geom_point() +
+  facet_wrap(~ Timepoint) +
   ggtitle("B220_percent vs Prop of Replicating Mtb") +
   xlab("B220_percent") +
   ylab("Prop of Replicating TB") +
@@ -454,8 +257,9 @@ ggplot(granuloma_data_treatment, aes(x = B220_percent, y = (rep_tb/total_tb), co
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-ggplot(granuloma_data_treatment, aes(x = Other_percent, y = (rep_tb/total_tb), color = treatment)) +
+ggplot(granuloma_data, aes(x = Other_percent, y = (rep_tb/total_tb), color = Vaccination)) +
   geom_point() +
+  facet_wrap(~ Timepoint) +
   ggtitle("Other_percent vs Prop of Replicating Mtb") +
   xlab("Other_percent") +
   ylab("Prop of Replicating TB") +
@@ -463,8 +267,9 @@ ggplot(granuloma_data_treatment, aes(x = Other_percent, y = (rep_tb/total_tb), c
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-ggplot(granuloma_data_treatment, aes(x = CD4_percent, y = (rep_tb/total_tb), color = treatment)) +
+ggplot(granuloma_data, aes(x = CD4_percent, y = (rep_tb/total_tb), color = Vaccination)) +
   geom_point() +
+  facet_wrap(~ Timepoint) +
   ggtitle("CD4_percent vs Prop of Replicating Mtb") +
   xlab("CD4_percent") +
   ylab("Prop of Replicating TB") +
@@ -472,11 +277,22 @@ ggplot(granuloma_data_treatment, aes(x = CD4_percent, y = (rep_tb/total_tb), col
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+
 # Fecteted by mouse, each dot is a lesion within that mouse
 ```{r}
 #GOOD
 
-ggplot(granuloma_data_treatment, aes(x = CD8_percent, y = (rep_tb/total_tb), color = treatment)) +
+ggplot(granuloma_data, aes(x = CD4_percent, y = (rep_tb/total_tb), color = Vaccination)) +
+  geom_point() +
+  facet_wrap(~ mouse) +
+  ggtitle("CD4_percent vs Prop of Replicating Mtb") +
+  xlab("CD4_percent") +
+  ylab("Prop of Replicating TB") +
+  scale_color_viridis_d() + 
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(granuloma_data, aes(x = CD8_percent, y = (rep_tb/total_tb), color = Vaccination)) +
   geom_point() +
   facet_wrap(~ mouse) +
   ggtitle("CD8_percent vs Prop of Replicating Mtb") +
@@ -486,7 +302,7 @@ ggplot(granuloma_data_treatment, aes(x = CD8_percent, y = (rep_tb/total_tb), col
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-ggplot(granuloma_data_treatment, aes(x = B220_percent, y = (rep_tb/total_tb), color = treatment)) +
+ggplot(granuloma_data, aes(x = B220_percent, y = (rep_tb/total_tb), color = Vaccination)) +
   geom_point() +
   facet_wrap(~ mouse) +
   ggtitle("B220_percent vs Prop of Replicating Mtb") +
@@ -496,7 +312,7 @@ ggplot(granuloma_data_treatment, aes(x = B220_percent, y = (rep_tb/total_tb), co
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-ggplot(granuloma_data_treatment, aes(x = Other_percent, y = (rep_tb/total_tb), color = treatment)) +
+ggplot(granuloma_data, aes(x = Other_percent, y = (rep_tb/total_tb), color = Vaccination)) +
   geom_point() +
   facet_wrap(~ mouse) +
   ggtitle("Other_percent vs Prop of Replicating Mtb") +
@@ -505,18 +321,8 @@ ggplot(granuloma_data_treatment, aes(x = Other_percent, y = (rep_tb/total_tb), c
   scale_color_viridis_d() + 
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-ggplot(granuloma_data_treatment, aes(x = CD4_percent, y = (rep_tb/total_tb), color = treatment)) +
-  geom_point() +
-  facet_wrap(~ mouse) +
-  ggtitle("CD4_percent vs Prop of Replicating Mtb") +
-  xlab("CD4_percent") +
-  ylab("Prop of Replicating TB") +
-  scale_color_viridis_d() + 
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
-# Modeling CD4
+# Modeling CD4 ONLY
 
 # Lesion nested within mouse
 ```{r}
@@ -525,8 +331,12 @@ model_nested <- glmer(rep_tb ~ CD4_prop + (1 | mouse) + (1 | mouse:lesion), data
 model_nested <- glmer(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse) + (1 | mouse:lesion), data = granuloma_data, family = poisson())
 
 
-summary(model_nested)
-
+# # Fit the two models
+# model1 <- glmer(rep_tb ~ CD4_prop + (1 | mouse/lesion), data = granuloma_data, family = poisson())
+# model2 <- glmer(rep_tb ~ CD4_prop + (1 | mouse), data = granuloma_data, family = poisson())
+# 
+# # Perform the likelihood ratio test
+# anova(model1, model2)
 
 # Compute the dispersion statistic
 dispersion_statistic <- sum(residuals(model_nested, type = "pearson")^2) / df.residual(model_nested)
@@ -540,151 +350,172 @@ pearson_residuals <- residuals(model_nested, type = "pearson")
 P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_nested) - length(fixef(model_nested)))
 
 P_dispersion_statistic
-
-
-# # Fit the two models
-# model1 <- glmer(rep_tb ~ CD4_prop + (1 | mouse/lesion), data = granuloma_data, family = poisson())
-# model2 <- glmer(rep_tb ~ CD4_prop + (1 | mouse), data = granuloma_data, family = poisson())
-# 
-# # Perform the likelihood ratio test
-# anova(model1, model2)
-
-#GOOD
-ggplot(granuloma_data_treatment, aes(x = CD4_percent, y = (rep_tb/total_tb), color = Vaccination)) +
-  geom_point() +
-  facet_wrap(~ Timepoint) +
-  ggtitle("CD4_percent vs Prop of Replicating Mtb") +
-  xlab("CD4_percent") +
-  ylab("Prop of Replicating TB") +
-  scale_color_viridis_d() + 
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-
 ```
 
 # Lesion nested within mouse + offset to account for total Mtb
 ```{r}
 
-granuloma_data <- granuloma_data %>% 
+granuloma_data <- granuloma_data %>%
   mutate(unique_lesion = rownames(granuloma_data))
+# # 
+# # model_nested_offset <- glmer(rep_tb ~ CD4_prop + (1 | mouse/unique_lesion) + offset(log(total_tb)), data = granuloma_data, family = poisson())
 # 
-# model_nested_offset <- glmer(rep_tb ~ CD4_prop + (1 | mouse/unique_lesion) + offset(log(total_tb)), data = granuloma_data, family = poisson())
-
-# model_nested_offset <- glmer(rep_tb ~ CD4_prop + (1 | mouse) + offset(log(total_tb)), data = granuloma_data, family = poisson())
+# # model_nested_offset <- glmer(rep_tb ~ CD4_prop + (1 | mouse) + offset(log(total_tb)), data = granuloma_data, family = poisson())
+# # 
+# model_nested_offset <- glmer(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse) + (1 | mouse:unique_lesion) + offset(log(total_tb)), data = granuloma_data, family = poisson())
 # 
-model_nested_offset <- glmer(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse) + (1 | mouse:unique_lesion) + offset(log(total_tb)), data = granuloma_data, family = poisson())
-
-summary(model_nested_offset)
-
-
-# Compute the dispersion statistic
-dispersion_statistic <- sum(residuals(model_nested_offset , type = "pearson")^2) / df.residual(model_nested_offset )
-dispersion_statistic
-
-# Calculate Pearson residuals
-pearson_residuals <- residuals(model_nested_offset, type = "pearson")
-
-# Compute the dispersion statistic
-P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_nested_offset) - length(fixef(model_nested_offset)))
-
-P_dispersion_statistic
+# summary(model_nested_offset)
+# 
+# 
+# # Compute the dispersion statistic
+# dispersion_statistic <- sum(residuals(model_nested_offset , type = "pearson")^2) / df.residual(model_nested_offset )
+# dispersion_statistic
+# 
+# # Calculate Pearson residuals
+# pearson_residuals <- residuals(model_nested_offset, type = "pearson")
+# 
+# # Compute the dispersion statistic
+# P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_nested_offset) - length(fixef(model_nested_offset)))
+# 
+# P_dispersion_statistic
 ```
 
 # Model accounting for mouse variance
 ```{r}
-model_mouse <- glmer(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse), data = granuloma_data, family = poisson())
-
-
-summary(model_mouse)
-
-
-# Compute the dispersion statistic
-dispersion_statistic <- sum(residuals(model_mouse, type = "pearson")^2) / df.residual(model_mouse)
-dispersion_statistic
-
-# Calculate Pearson residuals
-pearson_residuals <- residuals(model_mouse, type = "pearson")
-
-# Compute the dispersion statistic
-P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_mouse) - length(fixef(model_mouse)))
-
-P_dispersion_statistic
+# model_mouse <- glmer(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse), data = granuloma_data, family = poisson())
+# 
+# 
+# summary(model_mouse)
+# 
+# 
+# # Compute the dispersion statistic
+# dispersion_statistic <- sum(residuals(model_mouse, type = "pearson")^2) / df.residual(model_mouse)
+# dispersion_statistic
+# 
+# # Calculate Pearson residuals
+# pearson_residuals <- residuals(model_mouse, type = "pearson")
+# 
+# # Compute the dispersion statistic
+# P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_mouse) - length(fixef(model_mouse)))
+# 
+# P_dispersion_statistic
 ```
 
 
 # Model accounting for mouse variance + offset of total Mtb
 ```{r}
-# Fitting the model with the offset
-model_mouse_offset <- glmer(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse) + offset(log(total_tb)), 
-                           data = granuloma_data, 
-                           family = poisson())
-
-# Summary of the model
-summary(model_mouse_offset)
-
-
-dispersion_statistic <- sum(residuals(model_mouse_offset, type = "pearson")^2) / df.residual(model_mouse_offset)
-dispersion_statistic
-
-# Calculate Pearson residuals
-pearson_residuals <- residuals(model_mouse_offset, type = "pearson")
-
-# Compute the dispersion statistic
-P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_mouse_offset) - length(fixef(model_mouse_offset)))
-
-P_dispersion_statistic
+# # Fitting the model with the offset
+# model_mouse_offset <- glmer(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse) + offset(log(total_tb)), 
+#                            data = granuloma_data, 
+#                            family = poisson())
+# 
+# # Summary of the model
+# summary(model_mouse_offset)
+# 
+# 
+# dispersion_statistic <- sum(residuals(model_mouse_offset, type = "pearson")^2) / df.residual(model_mouse_offset)
+# dispersion_statistic
+# 
+# # Calculate Pearson residuals
+# pearson_residuals <- residuals(model_mouse_offset, type = "pearson")
+# 
+# # Compute the dispersion statistic
+# P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_mouse_offset) - length(fixef(model_mouse_offset)))
+# 
+# P_dispersion_statistic
 ```
 
 
 # Negative binomial model accounting for mouse variance + offset of total Mtb
 ```{r}
 # Fit the negative binomial model
-#model_nb <- glmer.nb(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse) + offset(log(total_tb)), data = granuloma_data)
-model_nb <- glmer.nb(rep_tb ~ CD4_count_500 + Vaccination * Timepoint + (1 | mouse) + offset(log(total_tb)), data = granuloma_data)
-# Summary of the model
-summary(model_nb)
-
-dispersion_statistic <- sum(residuals(model_nb, type = "pearson")^2) / df.residual(model_nb)
-dispersion_statistic
-
-# Calculate Pearson residuals
-pearson_residuals <- residuals(model_nb, type = "pearson")
-
-# Compute the dispersion statistic
-P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_nb) - length(fixef(model_nb)))
-
-P_dispersion_statistic
+# #model_nb <- glmer.nb(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse) + offset(log(total_tb)), data = granuloma_data)
+# # Summary of the model
+# summary(model_nb)
+# 
+# dispersion_statistic <- sum(residuals(model_nb, type = "pearson")^2) / df.residual(model_nb)
+# dispersion_statistic
+# 
+# # Calculate Pearson residuals
+# pearson_residuals <- residuals(model_nb, type = "pearson")
+# 
+# # Compute the dispersion statistic
+# P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_nb) - length(fixef(model_nb)))
+# 
+# P_dispersion_statistic
 
 #https://stackoverflow.com/questions/77564725/nesting-a-random-factor-in-glmm
 #https://stats.stackexchange.com/questions/228800/crossed-vs-nested-random-effects-how-do-they-differ-and-how-are-they-specified
 ```
 
-# Modeling "Other"
 
 # Lesion nested within mouse
 ```{r}
+nb <- glmer.nb(rep_tb ~ CD4_count_500 + CD8_count_500 + B220_count_500 + Vaccination + Timepoint + (1 | mouse/unique_lesion) + offset(log(total_tb)), data = granuloma_data)
+
+summary(nb)
 
 
+model_mouse_offset <- glmer(rep_tb ~ CD4_count_500 + CD8_count_500 + B220_count_500 + 
+                              Vaccination + Timepoint + (1 | mouse) + offset(log(total_tb)) + (1 | unique_lesion), 
+                            data = granuloma_data, family = poisson())
+
+
+summary(model_mouse_offset)
+
+# Coefficients from the model
+coefficients <- c(Intercept = -2.75987,
+                  CD4_count_500 = -0.09134,
+                  CD8_count_500 = 0.06960,
+                  B220_count_500 = 0.04841,
+                  VaccinationSAL = 0.28365,
+                  TimepointD56 = 0.96559)
+
+# Function to calculate percentage change
+percent_change <- function(coef) {
+  (exp(coef) - 1) * 100
+}
+
+# Apply the function to all coefficients (excluding the intercept)
+percent_changes <- sapply(coefficients[-1], percent_change)
+
+# Output the percent changes
+percent_changes
 ```
 
-# Lesion nested within mouse + offset to account for total Mtb
 ```{r}
 
+# Generate predicted values for interaction plot
+granuloma_data$predicted <- predict(model_mouse_offset, type = "response")
+
+# Create interaction plot
+ggplot(granuloma_data, aes(x = CD4_count_500, y = predicted, color = Vaccination, linetype = Timepoint)) +
+  geom_line() +
+  labs(title = "Interaction Plot of CD4 Count, Vaccination, and Timepoint",
+       x = "CD4 Count (scaled by 500)",
+       y = "Predicted Mtb Replication") +
+  theme_minimal()
+
+# Calculate residuals
+granuloma_data$residuals <- residuals(model_mouse_offset, type = "pearson")
+
+# Plot residuals
+ggplot(granuloma_data, aes(x = predicted, y = residuals)) +
+  geom_point() +
+  labs(title = "Residuals vs Predicted",
+       x = "Predicted Mtb Replication",
+       y = "Residuals") +
+  theme_minimal()
+
+install.packages("emmeans")
+library(emmeans)
+
+# Compute estimated marginal means for interaction
+emm <- emmeans(model_mouse_offset, ~ CD4_count_500 * Vaccination * Timepoint)
+
+# Plot interaction
+plot(emm, comparisons = TRUE)
+
+
 ```
 
-
-# Model accounting for mouse variance
-```{r}
-
-```
-
-# Model accounting for mouse variance + offset of total Mtb
-```{r}
-
-```
-
-# Negative binomial model accounting for mouse variance + offset of total Mtb
-```{r}
-
-```
