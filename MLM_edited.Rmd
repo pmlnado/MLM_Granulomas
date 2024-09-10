@@ -35,6 +35,7 @@ glm_RS <- glm(RS_prop ~ CD4_count_500 * Vaccination * Timepoint + offset(log(tot
 
 summary(glm_RS)
 
+
 # Correlation matrix
 cor(granuloma_data[, c("RS_prop", "CD4_count_500")])
 
