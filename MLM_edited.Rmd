@@ -53,7 +53,73 @@ percent_changes <- sapply(coefficients[-1], percent_change)
 
 # Output the percent changes
 percent_changes
+as.data.frame(percent_changes)
 ```
+```{r}
+CI <- exp(confint(glm_granuloma))
+# Extract coefficients
+coefficients <- summary(glm_granuloma)$coef
+
+# Define a significance threshold (e.g., 0.05)
+significance_threshold <- 1
+
+# Filter significant coefficients
+significant_coefficients <- coefficients[coefficients[, 4] < significance_threshold, ]
+
+# Calculate odds ratios
+rate_ratios <- exp(significant_coefficients[, 1])
+
+# Add variable names for interpretation
+rate_ratios <- data.frame(
+  Rate_Ratio = rate_ratios)
+
+
+
+rate_ratios <- as.data.frame(rate_ratios) %>% 
+    rownames_to_column('Cell Subset')
+CI_df  <- as.data.frame(CI) %>%
+    rownames_to_column('Cell Subset')
+
+CI_df <- CI_df %>% dplyr::slice(-1)
+
+
+rate_ratios <- inner_join(rate_ratios, CI_df, by = "Cell Subset")
+rate_ratios$`Cell Subset` <- gsub("^group", "", rate_ratios$`Cell Subset`)
+rate_ratios <- rate_ratios  %>%
+  filter(`Cell Subset` != "(Intercept)")
+
+rate_ratios 
+```
+
+```{r}
+rate_ratios<- data.frame(
+  Cell_Subset = c("CD4_count_500", "CD8_count_500", "B220_count_500"),
+  Rate_Ratio = c(0.8226647, 1.2578057, 1.0163662),
+  Lower_CI = c(0.7002648, 1.0319083, 0.9895011),
+  Upper_CI = c(0.9656904, 1.5343186, 1.0435044)
+)
+
+
+
+ggplot(rate_ratios, aes(x = Cell_Subset, y = Rate_Ratio)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = Lower_CI, ymax = Upper_CI), width = 0.2) +
+  coord_flip() +
+  theme_minimal() +
+  labs(
+    x = "Cell Subset",
+    y = "Rate Ratio",
+    title = ""
+  ) +
+  theme(
+    axis.text.y = element_text(size = 12),
+    axis.title = element_text(size = 14),
+    plot.title = element_text(size = 16, face = "bold")
+  )
+
+```
+
+
 ```{r}
 colnames(granuloma_data)
 
@@ -322,140 +388,16 @@ ggplot(granuloma_data, aes(x = Other_percent, y = (rep_tb/total_tb), color = Vac
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
-# Modeling CD4 ONLY
 
-# Lesion nested within mouse
-```{r}
-model_nested <- glmer(rep_tb ~ CD4_prop + (1 | mouse/lesion), data = granuloma_data, family = poisson())
-model_nested <- glmer(rep_tb ~ CD4_prop + (1 | mouse) + (1 | mouse:lesion), data = granuloma_data, family = poisson()) # Same model as 1st
-model_nested <- glmer(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse) + (1 | mouse:lesion), data = granuloma_data, family = poisson())
-
-
-# # Fit the two models
-# model1 <- glmer(rep_tb ~ CD4_prop + (1 | mouse/lesion), data = granuloma_data, family = poisson())
-# model2 <- glmer(rep_tb ~ CD4_prop + (1 | mouse), data = granuloma_data, family = poisson())
-# 
-# # Perform the likelihood ratio test
-# anova(model1, model2)
-
-# Compute the dispersion statistic
-dispersion_statistic <- sum(residuals(model_nested, type = "pearson")^2) / df.residual(model_nested)
-dispersion_statistic
-
-
-# Calculate Pearson residuals
-pearson_residuals <- residuals(model_nested, type = "pearson")
-
-# Compute the dispersion statistic
-P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_nested) - length(fixef(model_nested)))
-
-P_dispersion_statistic
-```
-
-# Lesion nested within mouse + offset to account for total Mtb
-```{r}
-
-granuloma_data <- granuloma_data %>%
-  mutate(unique_lesion = rownames(granuloma_data))
-# # 
-# # model_nested_offset <- glmer(rep_tb ~ CD4_prop + (1 | mouse/unique_lesion) + offset(log(total_tb)), data = granuloma_data, family = poisson())
-# 
-# # model_nested_offset <- glmer(rep_tb ~ CD4_prop + (1 | mouse) + offset(log(total_tb)), data = granuloma_data, family = poisson())
-# # 
-# model_nested_offset <- glmer(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse) + (1 | mouse:unique_lesion) + offset(log(total_tb)), data = granuloma_data, family = poisson())
-# 
-# summary(model_nested_offset)
-# 
-# 
-# # Compute the dispersion statistic
-# dispersion_statistic <- sum(residuals(model_nested_offset , type = "pearson")^2) / df.residual(model_nested_offset )
-# dispersion_statistic
-# 
-# # Calculate Pearson residuals
-# pearson_residuals <- residuals(model_nested_offset, type = "pearson")
-# 
-# # Compute the dispersion statistic
-# P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_nested_offset) - length(fixef(model_nested_offset)))
-# 
-# P_dispersion_statistic
-```
-
-# Model accounting for mouse variance
-```{r}
-# model_mouse <- glmer(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse), data = granuloma_data, family = poisson())
-# 
-# 
-# summary(model_mouse)
-# 
-# 
-# # Compute the dispersion statistic
-# dispersion_statistic <- sum(residuals(model_mouse, type = "pearson")^2) / df.residual(model_mouse)
-# dispersion_statistic
-# 
-# # Calculate Pearson residuals
-# pearson_residuals <- residuals(model_mouse, type = "pearson")
-# 
-# # Compute the dispersion statistic
-# P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_mouse) - length(fixef(model_mouse)))
-# 
-# P_dispersion_statistic
-```
-
-
-# Model accounting for mouse variance + offset of total Mtb
-```{r}
-# # Fitting the model with the offset
-# model_mouse_offset <- glmer(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse) + offset(log(total_tb)), 
-#                            data = granuloma_data, 
-#                            family = poisson())
-# 
-# # Summary of the model
-# summary(model_mouse_offset)
-# 
-# 
-# dispersion_statistic <- sum(residuals(model_mouse_offset, type = "pearson")^2) / df.residual(model_mouse_offset)
-# dispersion_statistic
-# 
-# # Calculate Pearson residuals
-# pearson_residuals <- residuals(model_mouse_offset, type = "pearson")
-# 
-# # Compute the dispersion statistic
-# P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_mouse_offset) - length(fixef(model_mouse_offset)))
-# 
-# P_dispersion_statistic
-```
-
-
-# Negative binomial model accounting for mouse variance + offset of total Mtb
-```{r}
-# Fit the negative binomial model
-# #model_nb <- glmer.nb(rep_tb ~ CD4_prop + Vaccination * Timepoint + (1 | mouse) + offset(log(total_tb)), data = granuloma_data)
-# # Summary of the model
-# summary(model_nb)
-# 
-# dispersion_statistic <- sum(residuals(model_nb, type = "pearson")^2) / df.residual(model_nb)
-# dispersion_statistic
-# 
-# # Calculate Pearson residuals
-# pearson_residuals <- residuals(model_nb, type = "pearson")
-# 
-# # Compute the dispersion statistic
-# P_dispersion_statistic <- sum(pearson_residuals^2) / (nobs(model_nb) - length(fixef(model_nb)))
-# 
-# P_dispersion_statistic
-
-#https://stackoverflow.com/questions/77564725/nesting-a-random-factor-in-glmm
-#https://stats.stackexchange.com/questions/228800/crossed-vs-nested-random-effects-how-do-they-differ-and-how-are-they-specified
-```
-
-
-# Lesion nested within mouse
 ```{r}
 # nb <- glmer.nb(rep_tb ~ CD4_count_500 + CD8_count_500 + B220_count_500 + Vaccination + Timepoint + (1 | mouse/unique_lesion) + offset(log(total_tb)), data = granuloma_data)
 # 
 # summary(nb)
+```
 
 
+# Lesion nested within mouse
+```{r}
 model_mouse_offset <- glmer(rep_tb ~ CD4_count_500 + CD8_count_500 + B220_count_500 + 
                               Vaccination + Timepoint + (1 | mouse) + offset(log(total_tb)) + (1 | unique_lesion), 
                             data = granuloma_data, family = poisson())
@@ -483,11 +425,75 @@ percent_changes <- sapply(coefficients[-1], percent_change)
 percent_changes
 
 mouse_model_offset_df <- as.data.frame(percent_changes)
-colnames(mouse_model_offset_df)[1] <- "test"
 
 mouse_model_offset_df  <- rownames_to_column(mouse_model_offset_df , var = "Cell Subset")
 
 
+
+```
+ Calculate the rate ratios
+```{r echo=TRUE}
+CI <- exp(confint(model_mouse_offset))
+# Extract coefficients
+coefficients <- summary(model_mouse_offset)$coef
+
+# Define a significance threshold (e.g., 0.05)
+significance_threshold <- 1
+
+# Filter significant coefficients
+significant_coefficients <- coefficients[coefficients[, 4] < significance_threshold, ]
+
+# Calculate odds ratios
+rate_ratios <- exp(significant_coefficients[, 1])
+
+# Add variable names for interpretation
+rate_ratios <- data.frame(
+  Rate_Ratio = rate_ratios)
+
+
+
+rate_ratios <- as.data.frame(rate_ratios) %>% 
+    rownames_to_column('Cell Subset')
+CI_df  <- as.data.frame(CI) %>%
+    rownames_to_column('Cell Subset')
+
+CI_df <- CI_df %>% dplyr::slice(-c(1, 2))
+
+
+rate_ratios <- inner_join(rate_ratios, CI_df, by = "Cell Subset")
+rate_ratios$`Cell Subset` <- gsub("^group", "", rate_ratios$`Cell Subset`)
+rate_ratios <- rate_ratios  %>%
+  filter(`Cell Subset` != "(Intercept)")
+
+rate_ratios 
+```
+
+
+plot rate ratios
+```{r echo=TRUE}
+rate_ratios <- data.frame(
+  Cell_Subset = c("CD4_count_500", "CD8_count_500", "B220_count_500"),
+  Rate_Ratio = c(0.9127092, 1.0720808, 1.0496014),
+  Lower_CI = c(0.7435882, 0.8485657, 1.0085407),
+  Upper_CI = c(1.121988, 1.351081, 1.093222)
+)
+
+
+ggplot(rate_ratios, aes(x = Cell_Subset, y = Rate_Ratio)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = Lower_CI, ymax = Upper_CI), width = 0.2) +
+  coord_flip() +
+  theme_minimal() +
+  labs(
+    x = "Cell Subset",
+    y = "Rate Ratio",
+    title = ""
+  ) +
+  theme(
+    axis.text.y = element_text(size = 12),
+    axis.title = element_text(size = 14),
+    plot.title = element_text(size = 16, face = "bold")
+  )
 
 ```
 
