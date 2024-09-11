@@ -451,9 +451,9 @@ granuloma_data <- granuloma_data %>%
 
 # Lesion nested within mouse
 ```{r}
-nb <- glmer.nb(rep_tb ~ CD4_count_500 + CD8_count_500 + B220_count_500 + Vaccination + Timepoint + (1 | mouse/unique_lesion) + offset(log(total_tb)), data = granuloma_data)
-
-summary(nb)
+# nb <- glmer.nb(rep_tb ~ CD4_count_500 + CD8_count_500 + B220_count_500 + Vaccination + Timepoint + (1 | mouse/unique_lesion) + offset(log(total_tb)), data = granuloma_data)
+# 
+# summary(nb)
 
 
 model_mouse_offset <- glmer(rep_tb ~ CD4_count_500 + CD8_count_500 + B220_count_500 + 
@@ -463,7 +463,7 @@ model_mouse_offset <- glmer(rep_tb ~ CD4_count_500 + CD8_count_500 + B220_count_
 
 summary(model_mouse_offset)
 
-# Coefficients from the model
+# Coefficients from Poisson regression
 coefficients <- c(Intercept = -2.75987,
                   CD4_count_500 = -0.09134,
                   CD8_count_500 = 0.06960,
@@ -471,7 +471,7 @@ coefficients <- c(Intercept = -2.75987,
                   VaccinationSAL = 0.28365,
                   TimepointD56 = 0.96559)
 
-# Function to calculate percentage change
+# Function to calculate percentage change from rate ratio (similar to odds ratio)
 percent_change <- function(coef) {
   (exp(coef) - 1) * 100
 }
@@ -479,41 +479,14 @@ percent_change <- function(coef) {
 # Apply the function to all coefficients (excluding the intercept)
 percent_changes <- sapply(coefficients[-1], percent_change)
 
-# Output the percent changes
+# Output the percent changes/outcome rate change. this is like percent change in odds from odds ratios calculated from estimated coefficients
 percent_changes
-```
 
-```{r}
-# Generate predicted values for interaction plot
-granuloma_data$predicted <- predict(model_mouse_offset, type = "response")
+mouse_model_offset_df <- as.data.frame(percent_changes)
+colnames(mouse_model_offset_df)[1] <- "test"
 
-# Create interaction plot
-ggplot(granuloma_data, aes(x = CD4_count_500, y = predicted, color = Vaccination, linetype = Timepoint)) +
-  geom_line() +
-  labs(title = "Interaction Plot of CD4 Count, Vaccination, and Timepoint",
-       x = "CD4 Count (scaled by 500)",
-       y = "Predicted Mtb Replication") +
-  theme_minimal()
+mouse_model_offset_df  <- rownames_to_column(mouse_model_offset_df , var = "Cell Subset")
 
-# Calculate residuals
-granuloma_data$residuals <- residuals(model_mouse_offset, type = "pearson")
-
-# Plot residuals
-ggplot(granuloma_data, aes(x = predicted, y = residuals)) +
-  geom_point() +
-  labs(title = "Residuals vs Predicted",
-       x = "Predicted Mtb Replication",
-       y = "Residuals") +
-  theme_minimal()
-
-install.packages("emmeans")
-library(emmeans)
-
-# Compute estimated marginal means for interaction
-emm <- emmeans(model_mouse_offset, ~ CD4_count_500 * Vaccination * Timepoint)
-
-# Plot interaction
-plot(emm, comparisons = TRUE)
 
 
 ```
