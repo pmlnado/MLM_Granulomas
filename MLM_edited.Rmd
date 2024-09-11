@@ -484,7 +484,6 @@ percent_changes
 ```
 
 ```{r}
-
 # Generate predicted values for interaction plot
 granuloma_data$predicted <- predict(model_mouse_offset, type = "response")
 
